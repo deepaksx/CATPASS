@@ -21,11 +21,11 @@ import {
 
 const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY });
 
-const MODEL = 'gemini-2.5-flash';
+const MODEL = 'gemini-2.0-flash';
 
 // Rate limiting: track request timestamps
 const requestTimestamps: number[] = [];
-const MAX_RPM = 9; // Stay under 10 RPM limit
+const MAX_RPM = 14; // Stay under 15 RPM limit (gemini-2.0-flash allows 15 RPM)
 
 async function waitForRateLimit(): Promise<void> {
   const now = Date.now();
@@ -103,18 +103,29 @@ const figureRecognitionSchema = z.object({
 async function callGemini(prompt: string): Promise<string> {
   await waitForRateLimit();
 
-  const response = await ai.models.generateContent({
-    model: MODEL,
-    contents: [{ role: 'user', parts: [{ text: prompt }] }],
-    config: {
-      responseMimeType: 'application/json',
-      temperature: 0.9,
-    },
-  });
+  try {
+    const response = await ai.models.generateContent({
+      model: MODEL,
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      config: {
+        responseMimeType: 'application/json',
+        temperature: 0.9,
+      },
+    });
 
-  const text = response.text;
-  if (!text) throw new Error('Empty response from Gemini');
-  return text;
+    const text = response.text;
+    if (!text) throw new Error('Empty response from Gemini');
+    return text;
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : String(e);
+    if (msg.includes('429') || msg.includes('RESOURCE_EXHAUSTED') || msg.includes('quota')) {
+      throw new Error('Rate limit reached. Please wait a minute and try again.');
+    }
+    if (msg.includes('API key')) {
+      throw new Error('Invalid API key. Please check your Gemini API key.');
+    }
+    throw new Error('Failed to generate question. Please try again.');
+  }
 }
 
 function parseJsonArray(text: string): unknown[] {
