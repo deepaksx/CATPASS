@@ -6,6 +6,7 @@ import { useSessionTimer } from './hooks/useTimer';
 import TopBar from './components/TopBar';
 import Dashboard from './components/Dashboard';
 import AIPractice from './components/AIPractice';
+import WordStudy from './components/WordStudy';
 
 function App() {
   const {
@@ -25,7 +26,11 @@ function App() {
 
   const handleSelectSkill = useCallback((subTestId: SubTestId) => {
     setActiveSkill(subTestId);
-    setPhase('practice');
+    if (subTestId === 'verbal-analogies') {
+      setPhase('wordStudy');
+    } else {
+      setPhase('practice');
+    }
   }, []);
 
   const handleBackToDashboard = useCallback(() => {
@@ -41,9 +46,9 @@ function App() {
 
   return (
     <div className="min-h-screen bg-bg text-text">
-      {phase === 'practice' && activeSkill && (
+      {(phase === 'practice' || phase === 'wordStudy') && activeSkill && (
         <TopBar
-          phase={`Practice: ${activeSkill.split('-').map(w => w[0].toUpperCase() + w.slice(1)).join(' ')}`}
+          phase={phase === 'wordStudy' ? 'Word Study' : `Practice: ${activeSkill.split('-').map(w => w[0].toUpperCase() + w.slice(1)).join(' ')}`}
           sessionSeconds={sessionTimer.seconds}
           onBack={handleBackToDashboard}
         />
@@ -55,6 +60,13 @@ function App() {
           onStartNew={handleStartNew}
           onSelectSkill={handleSelectSkill}
           onReset={handleReset}
+        />
+      )}
+
+      {phase === 'wordStudy' && activeSkill === 'verbal-analogies' && (
+        <WordStudy
+          onStart={() => setPhase('practice')}
+          onBack={handleBackToDashboard}
         />
       )}
 

@@ -8,7 +8,7 @@ export type SubTestId =
   | 'figure-analysis'
   | 'figure-recognition';
 
-export type Phase = 'dashboard' | 'practice';
+export type Phase = 'dashboard' | 'wordStudy' | 'practice';
 
 export type Difficulty = 'easy' | 'medium' | 'hard';
 
