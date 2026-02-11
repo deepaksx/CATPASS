@@ -58,10 +58,10 @@ Rules:
 
 Example:
 {
-  "prompt": "Ameliorate is to Exacerbate as Magnanimous is to ?",
-  "choices": ["Vindictive", "Altruistic", "Tenacious", "Pragmatic", "Resolute"],
+  "prompt": "Ovation is to Silence as Expenditure is to ?",
+  "choices": ["Savings", "Flourish", "Drought", "Permanent", "Abundant"],
   "correctAnswer": 0,
-  "explanation": "Ameliorate (to improve) and Exacerbate (to worsen) are antonyms. Magnanimous (generous/forgiving) and Vindictive (seeking revenge) are also antonyms.",
+  "explanation": "Ovation (applause) and Silence are antonyms. Expenditure (spending) and Savings are also antonyms. The relationship is opposites.",
   "rule": "Antonyms (opposites)"
 }`;
     })(),
