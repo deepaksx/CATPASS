@@ -127,35 +127,63 @@ IMPORTANT: Return ONLY valid JSON array. No markdown, no code blocks, just the a
 }
 
 export function getFigureClassificationPrompt(difficulty: Difficulty, count: number): string {
+  const diffGuide = DIFFICULTY_GUIDANCE[difficulty];
+
   return `Generate ${count} CAT4 Level F Figure Classification questions as JSON.
 
-In Figure Classification, 3 figures share a common rule. The student picks which of 5 choices also follows that rule.
+In Figure Classification, 3 compound figures share a common visual rule. The student picks which of 5 choices also follows that rule.
 
-Difficulty: ${difficulty} — ${DIFFICULTY_GUIDANCE[difficulty]}
+Difficulty: ${difficulty} — ${diffGuide}
 
-Each figure is described as a ShapeConfig object with these fields:
-- "shapeType": one of "circle", "triangle", "square", "pentagon", "hexagon", "star", "arrow", "cross", "diamond"
-- "fill": one of "solid", "empty", "striped-horizontal", "striped-vertical", "striped-diagonal", "dotted"
+Each figure is a CompoundFigure — a composition of 1-4 shape layers drawn on top of each other in a 100x100 box.
+
+Each layer has these fields:
+- "shape": one of "circle", "triangle", "square", "pentagon", "hexagon", "star", "arrow", "cross", "diamond", "rectangle", "parallelogram", "semicircle", "oval"
+- "size": one of "xs" (tiny), "small", "medium", "large", "xl" (fills most of the box)
+- "position": one of "center", "top", "bottom", "left", "right", "top-left", "top-right", "bottom-left", "bottom-right"
+- "fill": one of "solid" (black), "empty" (white outline), "gray" (gray fill), "striped-horizontal", "striped-vertical", "striped-diagonal", "dotted"
 - "rotation": number (degrees, optional, default 0)
-- "size": one of "small", "medium", "large" (optional, default "medium")
-- "innerShape": one of "circle", "triangle", "square", "pentagon", "hexagon", "star", "arrow", "cross", "diamond", "dot", "none" (optional)
 - "borderStyle": one of "solid", "dashed", "double", "thick", "thin" (optional, default "solid")
-- "count": number (how many of this shape, optional, default 1)
 
-Rules for generating:
-- The 3 figures must share exactly ONE clear visual rule (same shape, same fill, same size, same border, etc.)
-- The correct choice (1 of 5) must also follow this rule
-- The 4 wrong choices should NOT follow the rule but look plausible
-- For easy: single property rule (all circles, all solid fill)
-- For medium: two properties (all solid triangles) or transformed property (all rotated 90°)
-- For hard: combination of properties or subtle rules
+A CompoundFigure is: { "layers": [layer1, layer2, ...] }
+Layers are drawn back-to-front (layer[0] is behind, last layer is on top).
+
+EXAMPLE compound figures:
+- Large triangle with small circle on top: { "layers": [{"shape":"triangle","size":"large","position":"center","fill":"empty"}, {"shape":"circle","size":"small","position":"top","fill":"solid"}] }
+- Gray pentagon with small white star inside: { "layers": [{"shape":"pentagon","size":"large","position":"center","fill":"gray"}, {"shape":"star","size":"small","position":"center","fill":"empty"}] }
+- Two shapes side by side: { "layers": [{"shape":"square","size":"medium","position":"left","fill":"solid"}, {"shape":"circle","size":"medium","position":"right","fill":"empty"}] }
+- Large shape with small different shape overlapping: { "layers": [{"shape":"hexagon","size":"xl","position":"center","fill":"empty"}, {"shape":"triangle","size":"small","position":"top-right","fill":"gray"}] }
+
+CLASSIFICATION RULES (use different rules for variety):
+${difficulty === 'hard' ? `
+- All figures have a large shape containing a smaller DIFFERENT shape, with both shapes having the same fill
+- All figures have exactly 3 layers where sizes decrease (large, medium, small)
+- All figures have two shapes where the back layer is always gray and the front layer is always empty
+- All figures have shapes at opposite corners (e.g., top-left and bottom-right) with no center shape
+- All figures have the same spatial layout (e.g., something at center + something at top) but different shapes
+- All figures have one solid and one striped element` : `
+- All figures have exactly 2 shapes (one large, one small)
+- All figures have a large shape with a small shape on top
+- All figures contain a triangle somewhere
+- All figures have at least one solid-filled shape and one empty shape
+- All figures have a gray background shape with a different shape inside
+- All figures have two shapes of the same type but different sizes
+- All figures have shapes only on the left and right (none at center)`}
+
+CRITICAL RULES:
+- Each figure MUST have 2-4 layers to create compound compositions like real CAT4 exams
+- Do NOT create single-layer figures — every figure needs at least 2 shapes composed together
+- The 3 given figures must CLEARLY share the stated rule
+- Exactly 1 of 5 choices must also follow the rule
+- The 4 wrong choices should look plausible but violate the rule in different ways
+- Vary shapes, fills, and positions across figures — they should look different but share the rule
 
 Return a JSON array of ${count} objects, each with:
-- "rule": string (the classification rule)
-- "figures": ShapeConfig[] (exactly 3 figures that follow the rule)
-- "choices": ShapeConfig[] (exactly 5 choices, one correct)
-- "correctAnswer": number (0-4 index)
-- "explanation": string
+- "rule": string (the classification rule in plain English)
+- "figures": CompoundFigure[] (exactly 3 figures that follow the rule)
+- "choices": CompoundFigure[] (exactly 5 choices, one correct)
+- "correctAnswer": number (0-4 index of the correct choice)
+- "explanation": string (explain why the correct answer matches and others don't)
 
 IMPORTANT: Return ONLY valid JSON array. No markdown, no code blocks.`;
 }

@@ -32,9 +32,25 @@ export const SUB_TESTS: SubTestInfo[] = [
   { id: 'figure-recognition', name: 'Figure Recognition', part: 3, questionCount: 18, timeMinutes: 9, secondsPerQuestion: 30 },
 ];
 
-export type ShapeType = 'circle' | 'triangle' | 'square' | 'pentagon' | 'hexagon' | 'star' | 'arrow' | 'cross' | 'diamond';
-export type FillType = 'solid' | 'empty' | 'striped-horizontal' | 'striped-vertical' | 'striped-diagonal' | 'dotted';
+export type ShapeType = 'circle' | 'triangle' | 'square' | 'pentagon' | 'hexagon' | 'star' | 'arrow' | 'cross' | 'diamond' | 'rectangle' | 'parallelogram' | 'semicircle' | 'oval';
+export type FillType = 'solid' | 'empty' | 'gray' | 'striped-horizontal' | 'striped-vertical' | 'striped-diagonal' | 'dotted';
 export type BorderStyle = 'solid' | 'dashed' | 'double' | 'thick' | 'thin';
+
+export type LayerPosition = 'center' | 'top' | 'bottom' | 'left' | 'right' | 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
+export type LayerSize = 'xs' | 'small' | 'medium' | 'large' | 'xl';
+
+export interface FigureLayer {
+  shape: ShapeType;
+  size: LayerSize;
+  position: LayerPosition;
+  fill: FillType;
+  rotation?: number;
+  borderStyle?: BorderStyle;
+}
+
+export interface CompoundFigure {
+  layers: FigureLayer[];
+}
 
 export interface ShapeConfig {
   shapeType: ShapeType;
@@ -51,8 +67,8 @@ export interface FigureClassificationQuestion {
   id: string;
   difficulty: Difficulty;
   rule: string;
-  figures: ShapeConfig[];
-  choices: ShapeConfig[];
+  figures: CompoundFigure[];
+  choices: CompoundFigure[];
   correctAnswer: number; // 0-4
   explanation: string;
 }

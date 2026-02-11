@@ -10,6 +10,7 @@ import type {
   FigureAnalysisQuestion,
   FigureRecognitionQuestion,
   ShapeConfig,
+  CompoundFigure,
 } from '../lib/types';
 import {
   getTextQuestionPrompt,
@@ -59,10 +60,34 @@ const shapeConfigSchema = z.object({
   count: z.number().optional(),
 });
 
+const figureLayerSchema = z.object({
+  shape: z.enum([
+    'circle', 'triangle', 'square', 'pentagon', 'hexagon',
+    'star', 'arrow', 'cross', 'diamond',
+    'rectangle', 'parallelogram', 'semicircle', 'oval',
+  ]),
+  size: z.enum(['xs', 'small', 'medium', 'large', 'xl']),
+  position: z.enum([
+    'center', 'top', 'bottom', 'left', 'right',
+    'top-left', 'top-right', 'bottom-left', 'bottom-right',
+  ]),
+  fill: z.enum([
+    'solid', 'empty', 'gray',
+    'striped-horizontal', 'striped-vertical', 'striped-diagonal',
+    'dotted',
+  ]),
+  rotation: z.number().optional(),
+  borderStyle: z.enum(['solid', 'dashed', 'double', 'thick', 'thin']).optional(),
+});
+
+const compoundFigureSchema = z.object({
+  layers: z.array(figureLayerSchema).min(1).max(4),
+});
+
 const figureClassificationSchema = z.object({
   rule: z.string(),
-  figures: z.array(shapeConfigSchema).length(3),
-  choices: z.array(shapeConfigSchema).length(5),
+  figures: z.array(compoundFigureSchema).length(3),
+  choices: z.array(compoundFigureSchema).length(5),
   correctAnswer: z.number().min(0).max(4),
   explanation: z.string(),
 });
@@ -207,8 +232,8 @@ export async function generateFigureClassificationQuestions(
         id: nextId('fc'),
         difficulty,
         rule: parsed.data.rule,
-        figures: parsed.data.figures as ShapeConfig[],
-        choices: parsed.data.choices as ShapeConfig[],
+        figures: parsed.data.figures as CompoundFigure[],
+        choices: parsed.data.choices as CompoundFigure[],
         correctAnswer: parsed.data.correctAnswer,
         explanation: parsed.data.explanation,
       });

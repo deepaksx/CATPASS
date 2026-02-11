@@ -1,6 +1,6 @@
 import React from 'react';
 import type { FigureClassificationQuestion } from '../../lib/types';
-import ShapeRenderer, { ShapeCard } from './ShapeRenderer';
+import CompoundFigureRenderer, { CompoundFigureCard } from './CompoundFigureRenderer';
 
 interface Props {
   question: FigureClassificationQuestion;
@@ -22,13 +22,13 @@ const FigureClassificationQ: React.FC<Props> = ({
   return (
     <div className="flex flex-col items-center gap-6">
       {/* Three given figures */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 flex-wrap justify-center">
         <span className="text-text-muted text-sm mr-2">Given figures:</span>
         <div className="flex gap-3">
           {question.figures.map((fig, i) => (
             <div key={i} className="bg-white rounded-lg p-1">
               <svg width={120} height={120} viewBox="0 0 100 100">
-                <ShapeRenderer config={fig} cx={50} cy={50} />
+                <CompoundFigureRenderer figure={fig} />
               </svg>
             </div>
           ))}
@@ -54,8 +54,8 @@ const FigureClassificationQ: React.FC<Props> = ({
             }
             return (
               <div key={i} className={borderClass + ' rounded-lg'}>
-                <ShapeCard
-                  config={choice}
+                <CompoundFigureCard
+                  figure={choice}
                   selected={selectedAnswer === i}
                   onClick={() => onSelect(i)}
                   label={labels[i]}
