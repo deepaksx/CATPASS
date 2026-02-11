@@ -21,11 +21,11 @@ import {
 
 const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY });
 
-const MODEL = 'gemini-2.0-flash';
+const MODEL = 'gemini-2.5-flash';
 
 // Rate limiting: track request timestamps
 const requestTimestamps: number[] = [];
-const MAX_RPM = 14; // Stay under 15 RPM limit (gemini-2.0-flash allows 15 RPM)
+const MAX_RPM = 9; // Stay under 10 RPM limit
 
 async function waitForRateLimit(): Promise<void> {
   const now = Date.now();
