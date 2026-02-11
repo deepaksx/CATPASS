@@ -1,4 +1,5 @@
 import type { Difficulty, SubTestId } from '../lib/types';
+import { verbalAnalogiesVocabulary } from '../data/vocabulary';
 
 const DIFFICULTY_GUIDANCE: Record<Difficulty, string> = {
   easy: 'Simple, single-step reasoning. Common vocabulary/patterns. One clear rule.',
@@ -33,27 +34,37 @@ Example:
   "rule": "Planets in our solar system"
 }`,
 
-    'verbal-analogies': `Generate ${count} CAT4 Level F Verbal Analogies questions for 13-15 year old students.
+    'verbal-analogies': (() => {
+      const wordList = verbalAnalogiesVocabulary.map(w => `${w.word} — ${w.meaning}`).join('\n');
+      return `Generate ${count} CAT4 Level F Verbal Analogies questions for 13-15 year old students.
 
 Format: "A is to B as C is to ?" — the student picks the word that completes the analogy from 5 choices.
 
 Difficulty: ${difficulty} — ${diffGuide}
 
+CRITICAL REQUIREMENT — USE THESE WORDS:
+You MUST use words from the following vocabulary list in every question. Each question's prompt words (A, B, C) AND the correct answer AND wrong choices should come from or directly relate to these words. The student has studied this exact word list, so the questions must test their knowledge of these specific words and their meanings.
+
+VOCABULARY LIST:
+${wordList}
+
 Rules:
+- Every question MUST feature words from the vocabulary list above
 - The relationship between A→B must be the same type as C→answer
-- Relationship types: synonyms, antonyms, part:whole, object:function, cause:effect, category:example, degree/intensity, worker:tool, country:capital
+- Relationship types: synonyms, antonyms, part:whole, cause:effect, degree/intensity, category membership
 - Exactly 1 of the 5 choices correctly completes the analogy
-- Wrong choices should be related to C but not in the right way
-- Use age-appropriate vocabulary
+- Wrong choices should be other words from the vocabulary list that don't fit the relationship
+- Test the student's understanding of these specific word meanings
 
 Example:
 {
-  "prompt": "Hot is to Cold as Light is to ?",
-  "choices": ["Dark", "Bright", "Lamp", "Sun", "Shadow"],
+  "prompt": "Ameliorate is to Exacerbate as Magnanimous is to ?",
+  "choices": ["Vindictive", "Altruistic", "Tenacious", "Pragmatic", "Resolute"],
   "correctAnswer": 0,
-  "explanation": "Hot and Cold are antonyms. Light and Dark are also antonyms. The relationship is opposites.",
+  "explanation": "Ameliorate (to improve) and Exacerbate (to worsen) are antonyms. Magnanimous (generous/forgiving) and Vindictive (seeking revenge) are also antonyms.",
   "rule": "Antonyms (opposites)"
-}`,
+}`;
+    })(),
 
     'number-analogies': `Generate ${count} CAT4 Level F Number Analogies questions for 13-15 year old students.
 
