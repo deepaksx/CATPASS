@@ -27,7 +27,7 @@ const FigureClassificationQ: React.FC<Props> = ({
         <div className="flex gap-3">
           {question.figures.map((fig, i) => (
             <div key={i} className="bg-white rounded-lg p-1">
-              <svg width={80} height={80} viewBox="0 0 100 100">
+              <svg width={120} height={120} viewBox="0 0 100 100">
                 <ShapeRenderer config={fig} cx={50} cy={50} />
               </svg>
             </div>

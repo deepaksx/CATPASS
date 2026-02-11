@@ -9,8 +9,8 @@ interface Props {
   disabled?: boolean;
 }
 
-const PAPER_SIZE = 120;
-const HOLE_RADIUS = 6;
+const PAPER_SIZE = 160;
+const HOLE_RADIUS = 7;
 
 function renderFoldSequence(
   folds: FoldDirection[],

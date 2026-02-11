@@ -195,7 +195,7 @@ export default ShapeRenderer;
 
 export function ShapeCard({
   config,
-  size = 80,
+  size = 120,
   selected,
   onClick,
   label,

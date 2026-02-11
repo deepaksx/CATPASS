@@ -153,7 +153,7 @@ const FigureRecognitionQ: React.FC<Props> = ({
         <div className="flex flex-col items-center">
           <span className="text-text-muted text-sm mb-2">Find this shape:</span>
           <div className="bg-white rounded-lg p-3">
-            <svg width={80} height={80} viewBox="-5 -5 40 40">
+            <svg width={120} height={120} viewBox="-5 -5 40 40">
               <path d={targetPath} fill="none" stroke="black" strokeWidth={2} />
             </svg>
           </div>
@@ -163,7 +163,7 @@ const FigureRecognitionQ: React.FC<Props> = ({
         <div className="flex flex-col items-center">
           <span className="text-text-muted text-sm mb-2">In this figure:</span>
           <div className="bg-white rounded-lg p-2">
-            <svg width={200} height={200} viewBox="0 0 200 200">
+            <svg width={280} height={280} viewBox="0 0 200 200">
               {complexBg}
             </svg>
           </div>
@@ -200,7 +200,7 @@ const FigureRecognitionQ: React.FC<Props> = ({
               }`}
             >
               <div className="bg-white rounded">
-                <svg width={90} height={90} viewBox="0 0 200 200">
+                <svg width={130} height={130} viewBox="0 0 200 200">
                   {complexBg}
                   <rect
                     x={area.x - 5}

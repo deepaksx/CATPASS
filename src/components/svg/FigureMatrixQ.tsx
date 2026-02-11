@@ -19,7 +19,7 @@ const FigureMatrixQ: React.FC<Props> = ({
 }) => {
   const labels = ['A', 'B', 'C', 'D', 'E'];
   const gridCols = question.gridSize;
-  const cellSize = question.gridSize === 2 ? 90 : 70;
+  const cellSize = question.gridSize === 2 ? 130 : 100;
 
   return (
     <div className="flex flex-col items-center gap-6">
