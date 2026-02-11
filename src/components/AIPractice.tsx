@@ -14,12 +14,8 @@ interface AIPracticeProps {
   onBack: () => void;
 }
 
-function getAdaptiveDifficulty(mastery: SkillMastery): Difficulty {
-  if (mastery.attempted === 0) return 'easy';
-  const pct = (mastery.correct / mastery.attempted) * 100;
-  if (pct >= 80 && mastery.currentStreak >= 3) return 'hard';
-  if (pct >= 60) return 'medium';
-  return 'easy';
+function getAdaptiveDifficulty(_mastery: SkillMastery): Difficulty {
+  return 'hard';
 }
 
 const AIPractice: React.FC<AIPracticeProps> = ({
@@ -39,16 +35,6 @@ const AIPractice: React.FC<AIPracticeProps> = ({
   const [wrongStreak, setWrongStreak] = useState(0);
 
   const { currentQuestion, isLoading, error, nextQuestion, retry } = useQuestionBuffer(subTestId, difficulty);
-
-  // Update difficulty based on performance
-  useEffect(() => {
-    if (streak >= 3 && difficulty !== 'hard') {
-      setDifficulty('hard');
-    } else if (wrongStreak >= 2 && difficulty !== 'easy') {
-      setDifficulty(prev => prev === 'hard' ? 'medium' : 'easy');
-      setWrongStreak(0);
-    }
-  }, [streak, wrongStreak, difficulty]);
 
   const handleSelect = useCallback((index: number) => {
     if (showFeedback || !currentQuestion) return;
