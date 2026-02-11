@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { SubTestId, Difficulty, SkillMastery } from '../lib/types';
 import { SUB_TESTS } from '../lib/types';
@@ -14,10 +14,6 @@ interface AIPracticeProps {
   onBack: () => void;
 }
 
-function getAdaptiveDifficulty(_mastery: SkillMastery): Difficulty {
-  return 'hard';
-}
-
 const AIPractice: React.FC<AIPracticeProps> = ({
   subTestId,
   mastery,
@@ -25,19 +21,27 @@ const AIPractice: React.FC<AIPracticeProps> = ({
   onBack,
 }) => {
   const subTest = SUB_TESTS.find(st => st.id === subTestId)!;
-  const [difficulty, setDifficulty] = useState<Difficulty>(() => getAdaptiveDifficulty(mastery));
+  const difficulty: Difficulty = 'hard';
+
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [showFeedback, setShowFeedback] = useState(false);
   const [sessionCorrect, setSessionCorrect] = useState(0);
   const [sessionTotal, setSessionTotal] = useState(0);
   const [showTricks, setShowTricks] = useState(false);
   const [streak, setStreak] = useState(mastery.currentStreak);
-  const [wrongStreak, setWrongStreak] = useState(0);
+
+  // Track which question ID we've answered to prevent double-firing
+  const answeredQuestionRef = useRef<string | null>(null);
 
   const { currentQuestion, isLoading, error, nextQuestion, retry } = useQuestionBuffer(subTestId, difficulty);
 
   const handleSelect = useCallback((index: number) => {
-    if (showFeedback || !currentQuestion) return;
+    if (!currentQuestion) return;
+    // Block if already answered this question or feedback is showing
+    if (showFeedback) return;
+    if (answeredQuestionRef.current === currentQuestion.id) return;
+
+    answeredQuestionRef.current = currentQuestion.id;
     setSelectedAnswer(index);
     setShowFeedback(true);
 
@@ -46,19 +50,22 @@ const AIPractice: React.FC<AIPracticeProps> = ({
     if (wasCorrect) {
       setSessionCorrect(prev => prev + 1);
       setStreak(prev => prev + 1);
-      setWrongStreak(0);
     } else {
       setStreak(0);
-      setWrongStreak(prev => prev + 1);
     }
 
     onUpdateMastery(subTestId, wasCorrect);
   }, [showFeedback, currentQuestion, subTestId, onUpdateMastery]);
 
   const handleContinue = useCallback(() => {
+    // Reset answer state FIRST, then advance
+    answeredQuestionRef.current = null;
     setSelectedAnswer(null);
     setShowFeedback(false);
-    nextQuestion();
+    // Use setTimeout to ensure state resets are flushed before new question renders
+    setTimeout(() => {
+      nextQuestion();
+    }, 0);
   }, [nextQuestion]);
 
   const sessionPct = sessionTotal > 0 ? Math.round((sessionCorrect / sessionTotal) * 100) : 0;
@@ -125,6 +132,9 @@ const AIPractice: React.FC<AIPracticeProps> = ({
     );
   }
 
+  // Don't render question if answer state hasn't been reset yet
+  const isReady = !showFeedback || (showFeedback && answeredQuestionRef.current === currentQuestion?.id);
+
   return (
     <div className="py-6 px-4 max-w-2xl mx-auto">
       {/* Header */}
@@ -154,7 +164,7 @@ const AIPractice: React.FC<AIPracticeProps> = ({
 
       {/* Question */}
       <AnimatePresence mode="wait">
-        {currentQuestion && (
+        {currentQuestion && isReady && (
           <motion.div
             key={currentQuestion.id}
             initial={{ opacity: 0, x: 20 }}
@@ -163,12 +173,12 @@ const AIPractice: React.FC<AIPracticeProps> = ({
           >
             <QuestionCard
               question={currentQuestion}
-              selectedAnswer={selectedAnswer}
+              selectedAnswer={answeredQuestionRef.current === currentQuestion.id ? selectedAnswer : null}
               onSelect={handleSelect}
-              showFeedback={showFeedback}
-              disabled={showFeedback}
+              showFeedback={answeredQuestionRef.current === currentQuestion.id && showFeedback}
+              disabled={answeredQuestionRef.current === currentQuestion.id && showFeedback}
             />
-            {showFeedback && (
+            {answeredQuestionRef.current === currentQuestion.id && showFeedback && (
               <div className="mt-4">
                 <Explanation
                   show={true}
